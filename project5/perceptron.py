@@ -51,8 +51,6 @@ class PerceptronClassifier:
         # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
         # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
 
-        #print(trainingData[0])
-
         for iteration in range(self.max_iterations):
             print("Starting iteration ", iteration, "...")
 
@@ -93,6 +91,8 @@ class PerceptronClassifier:
         featuresWeights = []
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        features = self.weights[label].sortedKeys()
+
+        featuresWeights = features[:100]
 
         return featuresWeights
