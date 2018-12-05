@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -44,18 +44,31 @@ class PerceptronClassifier:
         Use the provided self.weights[label] data structure so that
         the classify method works correctly. Also, recall that a
         datum is a counter from features to values for those features
-        (and thus represents a vector a values).
+        (and thus represents a vector of values).
         """
 
         self.features = list(trainingData[0].keys()) # could be useful later
         # DO NOT ZERO OUT YOUR WEIGHTS BEFORE STARTING TRAINING, OR
         # THE AUTOGRADER WILL LIKELY DEDUCT POINTS.
 
+        #print(trainingData[0])
+
         for iteration in range(self.max_iterations):
             print("Starting iteration ", iteration, "...")
+
             for i in range(len(trainingData)):
                 "*** YOUR CODE HERE ***"
-                util.raiseNotDefined()
+                instance = trainingData[i]
+                vectors = util.Counter()
+                for l in self.legalLabels:
+                    vectors[l] = self.weights[l] * instance
+                guess = vectors.argMax()
+
+                if guess != trainingLabels[i]:
+                    # add to correct label
+                    self.weights[trainingLabels[i]] += instance
+                    # subtract from wrong label
+                    self.weights[guess] -= instance
 
     def classify(self, data ):
         """
