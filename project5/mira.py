@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -61,7 +61,36 @@ class MiraClassifier:
         representing a vector of values.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        for iteration in range(self.max_iterations):
+            print("Starting iteration ", iteration, "...")
+
+            CWeights = []
+
+            for C in Cgrid:
+
+                weights = util.Counter()
+
+                for i in range(len(trainingData)):
+                    instance = trainingData[i]
+                    vectors = util.Counter()
+                    for l in self.legalLabels:
+                        vectors[l] = self.weights[l] * instance
+                    guess = vectors.argMax()
+
+                    if guess != trainingLabels[i]:
+                        # calculate tau
+                        tau = ()((guess-trainingLabels[i])*instance) + 1)/(2)
+                        # add to correct label
+                        weights[trainingLabels[i]] += tau*instance
+                        # subtract from wrong label
+                        weights[guess] -= tau*instance
+
+                # store weights with C value
+                CWeights.append(weights)
+
+            # evaluate accuracy for each C
+            for weights in CWeights:
+
 
     def classify(self, data ):
         """
@@ -77,5 +106,3 @@ class MiraClassifier:
                 vectors[l] = self.weights[l] * datum
             guesses.append(vectors.argMax())
         return guesses
-
-
