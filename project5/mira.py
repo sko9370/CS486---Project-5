@@ -61,15 +61,12 @@ class MiraClassifier:
         representing a vector of values.
         """
         "*** YOUR CODE HERE ***"
-        for iteration in range(self.max_iterations):
-            print("Starting iteration ", iteration, "...")
-
-            CWeights = []
-
-            for C in Cgrid:
-
-                weights = util.Counter()
-
+        ######################### TRAINING ###########################
+        cweights = []
+        for c in Cgrid:
+            self.initializeWeightsToZero()
+            for iteration in range(self.max_iterations):
+                print("Starting iteration ", iteration, "...")
                 for i in range(len(trainingData)):
                     instance = trainingData[i]
                     vectors = util.Counter()
@@ -79,20 +76,96 @@ class MiraClassifier:
 
                     if guess != trainingLabels[i]:
                         # calculate tau
-                        tau = ()((guess-trainingLabels[i])*instance) + 1)/(2)
+                        tauTop = ((self.weights[guess]-self.weights[trainingLabels[i]]) * instance ) + 1.0
+                        tauBottom = 2*(instance*instance)
+                        tauMin = min(tauTop/tauBottom, c)
+                        tauInv = 1/tauMin
+                        instance.divideAll(tauInv)
                         # add to correct label
-                        weights[trainingLabels[i]] += tau*instance
+                        self.weights[trainingLabels[i]] += instance
                         # subtract from wrong label
-                        weights[guess] -= tau*instance
+                        self.weights[guess] -= instance
+            cweights.append(self.weights)
+        ########################## EVALUATION #############################
+        maxAccuracy = 0
+        maxIndex = 0
+        for i in range(len(cweights)):
+            correct = len(validationData)
+            total = len(validationData)
+
+            self.weights = cweights[i]
+            guesses = self.classify(validationData)
+            for j in range(len(guesses)):
+                if guesses[j] != validationLabels[j]:
+                    correct -= 1
+            if correct/total > maxAccuracy:
+                maxAccuracy = correct/total
+                maxIndex = i
+                print("!!! maxAccuracy: " + str(maxAccuracy))
+                print("!!! maxIndex: " + str(maxIndex))
+        self.weights = cweights[maxIndex]
+
+        """
+        for iteration in range(self.max_iterations):
+            print("Starting iteration ", iteration, "...")
+
+            CWeights = []
+
+            for C in Cgrid:
+
+                weights = {}
+                for label in self.legalLabels:
+                    weights[label] = util.Counter()
+
+                for i in range(len(trainingData)):
+                    instance = trainingData[i]
+                    vectors = util.Counter()
+                    for l in self.legalLabels:
+                        vectors[l] = self.weights[l] * instance
+                    guess = vectors.argMax()
+
+                    # if guessed label is different from actual label
+                    if guess != trainingLabels[i]:
+                        # calculate tau
+                        tau = (( (self.weights[guess]-self.weights[trainingLabels[i]]) * instance ) + 1.0)/(2*(instance*instance))
+                        tauMin = min(tau, C)
+                        tauInv = 1/tauMin
+                        instance.divideAll(tauInv)
+                        # add to correct label
+                        self.weights[trainingLabels[i]] += instance
+                        # subtract from wrong label
+                        self.weights[guess] -= instance
 
                 # store weights with C value
                 CWeights.append(weights)
+                print("appended new cweight")
 
-            # evaluate accuracy for each C
-            for weights in CWeights:
+            # evaluate accuracy for each C using validationData
+            maxAccuracy = 0
+            maxIndex = 0
+            for i in range(len(CWeights)):
+                correct = len(validationData)
+                total = len(validationData)
 
+                # set self.weights for testing using classify
+                self.weights = CWeights[i]
+                guesses = self.classify(validationData)
+                for j in range(len(guesses)):
+                    if guesses[j] != validationLabels[j]:
+                        correct -= 1
 
-    def classify(self, data ):
+                # better accuracy
+                if correct/total > maxAccuracy:
+                    maxAccuracy = correct/total
+                    print("better accuracy " + str(maxAccuracy))
+                    maxIndex = i
+                    print("accuracy index " + str(maxIndex))
+
+            # set those weights to self.weights
+            self.weights = CWeights[maxIndex]
+            """
+
+    def classify(self, data):
         """
         Classifies each datum as the label that most closely matches the prototype vector
         for that label.  See the project description for details.
