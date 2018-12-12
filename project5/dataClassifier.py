@@ -91,11 +91,13 @@ def enhancedFeatureExtractorDigit(datum):
         if features[f] == 0:
             whitepx.append(f)
     while whitepx:
-        print(whitepx)
         whitesearch(whitepx[0])
         regions+=1
+    if regions>1:
+        regions = 1
+    else:
+        regions = 0
     features["regions"] = regions  
-
     return features
 
 
