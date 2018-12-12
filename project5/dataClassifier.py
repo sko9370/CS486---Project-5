@@ -76,9 +76,25 @@ def enhancedFeatureExtractorDigit(datum):
     ##
     """
     features =  basicFeatureExtractorDigit(datum)
+    whitepx = []
+    regions = 0
 
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    "*** YOUR CODE HERE ***"    
+    def whitesearch(px):
+        #if (px[0]>0 and px[0]<DIGIT_DATUM_WIDTH) and (px[1]>0 and px[1]<DIGIT_DATUM_HEIGHT):
+            whitepx.remove(px)
+            for p in [(px[0]+1,px[1]),(px[0]-1,px[1]),(px[0],px[1]+1),(px[0],px[1]-1)]:
+                if p in whitepx:
+                    whitesearch(p)
+    keylist = features.sortedKeys()
+    for f in keylist:
+        if features[f] == 0:
+            whitepx.append(f)
+    while whitepx:
+        print(whitepx)
+        whitesearch(whitepx[0])
+        regions+=1
+    features["regions"] = regions  
 
     return features
 
