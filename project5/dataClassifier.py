@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -79,7 +79,7 @@ def enhancedFeatureExtractorDigit(datum):
     whitepx = []
     regions = 0
 
-    "*** YOUR CODE HERE ***"    
+    "*** YOUR CODE HERE ***"
     def whitesearch(px):
         #if (px[0]>0 and px[0]<DIGIT_DATUM_WIDTH) and (px[1]>0 and px[1]<DIGIT_DATUM_HEIGHT):
             whitepx.remove(px)
@@ -97,7 +97,7 @@ def enhancedFeatureExtractorDigit(datum):
         regions = 1
     else:
         regions = 0
-    features["regions"] = regions  
+    features["regions"] = regions
     return features
 
 
@@ -142,7 +142,71 @@ def enhancedPacmanFeatures(state, action):
     """
     features = util.Counter()
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    successor = state.generateSuccessor(0, action)
+
+    # no difference if in or inverse
+    capsulePositions = successor.getCapsules()
+    CapsuleCount = len(capsulePositions)
+
+    # no difference if in or inverse
+    ghostPositions = successor.getGhostPositions()
+    GhostCount = len(ghostPositions)
+
+    # putting this in significantly improves suicide but decreases contest by ~1%
+    foodPositions = successor.getFood() # boolean grid
+    FoodDis = 0
+
+    length = 0
+    for i in foodPositions:
+        length += 1
+    for x in range(length):
+        for y in range(len(foodPositions[x])):
+            if foodPositions[x][y]:
+                FoodDis += util.manhattanDistance((x,y), successor.getPacmanPosition())
+    if FoodDis == 0:
+        FoodDis = 0.1
+
+    minDis = 99999
+    for ghostPos in ghostPositions:
+        distance = util.manhattanDistance(ghostPos, successor.getPacmanPosition())
+        if distance < minDis:
+            minDis = distance
+    GhostDistance = minDis
+    if GhostDistance == 0:
+        GhostDistance = 0.1
+
+    # need this
+    ghostDis = 0
+    for ghostPos in ghostPositions:
+        ghostDis += util.manhattanDistance(ghostPos, successor.getPacmanPosition())
+    if ghostDis == 0:
+        ghostDis = 0.1
+
+    # slightly beneficial
+    capsuleDis = 0
+    for capsule in capsulePositions:
+        capsuleDis += util.manhattanDistance(capsule, successor.getPacmanPosition())
+
+    #features['win'] = successor.isWin()
+    if successor.isLose():
+        features['lose'] = 0
+    else:
+        features['lose'] = 1
+    features['capsuleCount'] = CapsuleCount
+    #features['ghostCount'] = GhostCount # no difference
+    features['foodDistances'] = 1/FoodDis
+    #features['ghostDistance'] = 1/GhostDistance #greatly improves suicide
+    features['ghostDis'] = 1/ghostDis # improves contest by 4%
+    features['capsuleDistances'] = capsuleDis # improves contest by 2%
+
+    # add scared time
+    scaredTime = 0
+    for ghostState in successor.getGhostStates():
+        scaredTime += ghostState.scaredTimer
+    if scaredTime == 0:
+        scaredTime = 0.1
+    features['scaredTime'] = 1/scaredTime
+
     return features
 
 
@@ -188,9 +252,9 @@ def analysis(classifier, guesses, testLabels, testData, rawTestData, printImage)
     #     prediction = guesses[i]
     #     truth = testLabels[i]
     #     if (prediction != truth):
-    #         print "==================================="
-    #         print "Mistake on example %d" % i
-    #         print "Predicted %d; truth is %d" % (prediction, truth)
+    #         print("===================================")
+    #         print("Mistake on example %d" % i)
+    #         print("Predicted %d; truth is %d" % (prediction, truth))
     #         print "Image: "
     #         print rawTestData[i]
     #         break
@@ -378,7 +442,7 @@ MAP_AGENT_TO_PATH_OF_SAVED_GAMES = {
 
 # Schrum: Used to add default value for numReturned attribute
 def defaultNumReturned(data):
-    for d in data: 
+    for d in data:
         for a in d.data.agentStates:
             a.numReturned = 0
 
@@ -386,7 +450,7 @@ def runClassifier(args, options):
     featureFunction = args['featureFunction']
     classifier = args['classifier']
     printImage = args['printImage']
-    
+
     # Load data
     numTraining = options.training
     numTest = options.test
@@ -400,7 +464,7 @@ def runClassifier(args, options):
         rawTrainingData, trainingLabels = samples.loadPacmanData(trainingData, numTraining)
         rawValidationData, validationLabels = samples.loadPacmanData(validationData, numTest)
         rawTestData, testLabels = samples.loadPacmanData(testData, numTest)
-        
+
         # Schrum: Add default numReturned attribute to all loaded data
         defaultNumReturned(rawTrainingData)
         defaultNumReturned(rawValidationData)
